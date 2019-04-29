@@ -7,8 +7,6 @@ pred<-data.frame(pred$Longitude, pred$Latitude)
 names(pred)=c("lon","lat")
 
 hansen<-raster(paste0(here(), "/Fiona_help_Hansen_dataset/Hansen_reclass.tiff"))
-#min_dist<-vector()
-
 
 
 hansen_dist_fun<-function(x){
@@ -32,7 +30,9 @@ hansen_dist_fun<-function(x){
     #subset to the cropped area
     test_pts <- rasterToPoints(test, function(x){!is.na(x)})
     test_pts<-test_pts[test_pts[,3] ==1,]
+    if(nrow(test_pts>=1)){
     dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+    }
   }
   
   if(is.null(dist_out)){
@@ -45,8 +45,10 @@ hansen_dist_fun<-function(x){
     #subset to the cropped area
     test_pts <- rasterToPoints(test, function(x){!is.na(x)})
     test_pts<-test_pts[test_pts[,3] ==1,]
-    dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
-  }
+    if(nrow(test_pts>=1)){
+      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+    }  
+    }
   
   if(is.null(dist_out)){
     
@@ -58,8 +60,10 @@ hansen_dist_fun<-function(x){
     #subset to the cropped area
     test_pts <- rasterToPoints(test, function(x){!is.na(x)})
     test_pts<-test_pts[test_pts[,3] ==1,]
-    dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
-  }
+    if(nrow(test_pts>=1)){
+      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+    }
+    }
   
   if(is.null(dist_out)){
     #have capped the maximum cropping distance to 4 degrees so that we don't end up cropping beyond the extent of the original raster e.g. values >180 degrees
@@ -71,8 +75,10 @@ hansen_dist_fun<-function(x){
     #subset to the cropped area
     test_pts <- rasterToPoints(test, function(x){!is.na(x)})
     test_pts<-test_pts[test_pts[,3] ==1,]
-    dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
-  }
+    if(nrow(test_pts>=1)){
+      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+    }
+    }
   
   if(is.null(dist_out)){
     dist_out<-paste0("Further than 4 degrees from nearest forest!")  
@@ -94,3 +100,5 @@ pred<-read.csv(paste0(here(),"/Fiona_help_Hansen_dataset/PREDICTS_NatPlusCrop_fo
 all_dist_out<-merge(pred, all_dist, by=c("lon", "lat"))
 
 write.csv(all_dist_out,"hans_min_dist_sp_1.csv", row.names=FALSE)
+
+
