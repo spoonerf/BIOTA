@@ -62,7 +62,7 @@ hansen_dist_fun<-function(x){
   }
   
   if(is.null(dist_out)){
-    
+    #have capped the maximum cropping distance to 4 degrees so that we don't end up cropping beyond the extent of the original raster e.g. values >180 degrees
     xmin<-x$lon -4
     xmax<-x$lon +4
     ymin<-x$lat -4
@@ -83,6 +83,7 @@ hansen_dist_fun<-function(x){
   return(dist_out_df)
   
 }
+#taking only unique locations to minimise processing time
 
 pred_u<-as.matrix(unique(pred))
 
