@@ -70,8 +70,8 @@ hansen_dist_fun<-function(x){
 
 pred_u<-as.matrix(unique(pred))
 
-test_fun<-apply(pred_u, MARGIN = 1 ,FUN = hansen_dist_fun)
+fun_out<-apply(pred_u, MARGIN = 1 ,FUN = hansen_dist_fun)
+all_dist<-do.call("rbind", fun_out)
 
 
-
-write.csv(predog,"hans_min_dist_sp_1.csv", row.names=FALSE)
+write.csv(all_dist,"hans_min_dist_sp_1.csv", row.names=FALSE)
