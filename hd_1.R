@@ -30,8 +30,13 @@ hansen_dist_fun<-function(x){
     #subset to the cropped area
     test_pts <- rasterToPoints(test, function(x){!is.na(x)})
     test_pts<-test_pts[test_pts[,3] ==1,]
-    if(nrow(test_pts>=1)){
-    dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+    
+    if(nrow(test_pts== 1)){
+      dist_out<-min(pointDistance(x, test_pts[1:2], lonlat = TRUE)/1000)
+    }
+    
+    if(nrow(test_pts> 1)){
+      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
     }
   }
   
@@ -45,9 +50,15 @@ hansen_dist_fun<-function(x){
     #subset to the cropped area
     test_pts <- rasterToPoints(test, function(x){!is.na(x)})
     test_pts<-test_pts[test_pts[,3] ==1,]
-    if(nrow(test_pts>=1)){
+    
+    if(nrow(test_pts== 1)){
+      dist_out<-min(pointDistance(x, test_pts[1:2], lonlat = TRUE)/1000)
+    }
+    
+    if(nrow(test_pts> 1)){
       dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
-    }  
+    }
+    
     }
   
   if(is.null(dist_out)){
@@ -60,7 +71,12 @@ hansen_dist_fun<-function(x){
     #subset to the cropped area
     test_pts <- rasterToPoints(test, function(x){!is.na(x)})
     test_pts<-test_pts[test_pts[,3] ==1,]
-    if(nrow(test_pts>=1)){
+    
+    if(nrow(test_pts== 1)){
+      dist_out<-min(pointDistance(x, test_pts[1:2], lonlat = TRUE)/1000)
+    }
+    
+    if(nrow(test_pts> 1)){
       dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
     }
     }
@@ -75,7 +91,12 @@ hansen_dist_fun<-function(x){
     #subset to the cropped area
     test_pts <- rasterToPoints(test, function(x){!is.na(x)})
     test_pts<-test_pts[test_pts[,3] ==1,]
-    if(nrow(test_pts>=1)){
+    
+    if(nrow(test_pts== 1)){
+      dist_out<-min(pointDistance(x, test_pts[1:2], lonlat = TRUE)/1000)
+    }
+    
+    if(nrow(test_pts> 1)){
       dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
     }
     }
@@ -93,7 +114,7 @@ hansen_dist_fun<-function(x){
 
 pred_u<-as.matrix(unique(pred))
 
-fun_out<-apply(pred_u, MARGIN = 1 ,FUN = hansen_dist_fun)
+fun_out<-apply(pred_u[1511:nrow(pred_u),], MARGIN = 1 ,FUN = hansen_dist_fun)
 all_dist<-do.call("rbind", fun_out)
 
 pred<-read.csv(paste0(here(),"/Fiona_help_Hansen_dataset/PREDICTS_NatPlusCrop_forestBiome_site_level_new.csv"))
