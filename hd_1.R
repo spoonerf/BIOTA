@@ -37,10 +37,23 @@ hansen_dist_fun<-function(x){
   
   if(is.null(dist_out)){
     
-    xmin<-x$lon -2
-    xmax<-x$lon +2
-    ymin<-x$lat -2
-    ymax<-x$lat +2
+    xmin<-x$lon -0.5
+    xmax<-x$lon +0.5
+    ymin<-x$lat -0.5
+    ymax<-x$lat +0.5
+    test<-crop(hansen, c(xmin,xmax,ymin,ymax))
+    #subset to the cropped area
+    test_pts <- rasterToPoints(test, function(x){!is.na(x)})
+    test_pts<-test_pts[test_pts[,3] ==1,]
+    dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+  }
+  
+  if(is.null(dist_out)){
+    
+    xmin<-x$lon -1
+    xmax<-x$lon +1
+    ymin<-x$lat -1
+    ymax<-x$lat +1
     test<-crop(hansen, c(xmin,xmax,ymin,ymax))
     #subset to the cropped area
     test_pts <- rasterToPoints(test, function(x){!is.na(x)})
@@ -61,6 +74,9 @@ hansen_dist_fun<-function(x){
     dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
   }
   
+  if(is.null(dist_out)){
+    dist_out<-paste0("Further than 4 degrees from nearest forest!")  
+  }
   
   dist_out_df<-cbind(x, dist_out)
   print(dist_out_df)
@@ -73,5 +89,7 @@ pred_u<-as.matrix(unique(pred))
 fun_out<-apply(pred_u, MARGIN = 1 ,FUN = hansen_dist_fun)
 all_dist<-do.call("rbind", fun_out)
 
+pred<-read.csv(paste0(here(),"/Fiona_help_Hansen_dataset/PREDICTS_NatPlusCrop_forestBiome_site_level_new.csv"))
+all_dist_out<-merge(pred, all_dist, by=c("lon", "lat"))
 
-write.csv(all_dist,"hans_min_dist_sp_1.csv", row.names=FALSE)
+write.csv(all_dist_out,"hans_min_dist_sp_1.csv", row.names=FALSE)
