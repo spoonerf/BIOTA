@@ -7,6 +7,25 @@ names(pred)=c("lon","lat")
 
 hansen<-raster("D:/Fiona/BIOTA/Fiona_help_Hansen_dataset/Hansen_reclass_90.tiff")
 
+buff_crop<-function(x,buff){
+  
+  xmin<-x$lon -buff
+  xmax<-x$lon +buff
+  ymin<-x$lat-buff
+  ymax<-x$lat +buff
+  xmin[xmin < -180]<- -180
+  xmax[xmax > 180]<- 180
+  ymin[xmin < -60]<- -60
+  ymax[xmin < 80]<- 80
+  test<-crop(hansen, c(xmin,xmax,ymin,ymax))
+  #subset to the cropped area
+  test_pts <- rasterToPoints(test, function(x){!is.na(x)})
+  test_pts<-test_pts[test_pts[,3] ==1,]
+  test_pts <- matrix(test_pts, ncol = 3)
+  return(test_pts)
+}
+
+
 hansen_dist_fun<-function(x){
   
   x<-data.frame(x[1], x[2])
@@ -21,111 +40,60 @@ hansen_dist_fun<-function(x){
     
   } else {
     
-    xmin<-x$lon -0.1
-    xmax<-x$lon +0.1
-    ymin<-x$lat-0.1
-    ymax<-x$lat +0.1
-    test<-crop(hansen, c(xmin,xmax,ymin,ymax))
-    #subset to the cropped area
-    test_pts <- rasterToPoints(test, function(x){!is.na(x)})
-    test_pts<-test_pts[test_pts[,3] ==1,]
-    
-    test_pts <- matrix(test_pts, ncol = 3)
-    
-    if(nrow(test_pts)==0){
-      dist_out<-NULL
-    }
-    
-    if(nrow(test_pts>= 1)){
-      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
-    }
-  }
-  
-  if(is.null(dist_out)){
-    
-    xmin<-x$lon -0.5
-    xmax<-x$lon +0.5
-    ymin<-x$lat -0.5
-    ymax<-x$lat +0.5
-    test<-crop(hansen, c(xmin,xmax,ymin,ymax))
-    #subset to the cropped area
-    test_pts <- rasterToPoints(test, function(x){!is.na(x)})
-    test_pts<-test_pts[test_pts[,3] ==1,]
-    test_pts <- matrix(test_pts, ncol = 3)
-    
-    if(nrow(test_pts)==0){
-      dist_out<-NULL
-    }
-    
-    if(nrow(test_pts>= 1)){
-      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
-    }
-    
-  }
-  
-  if(is.null(dist_out)){
-    
-    xmin<-x$lon -1
-    xmax<-x$lon +1
-    ymin<-x$lat -1
-    ymax<-x$lat +1
-    test<-crop(hansen, c(xmin,xmax,ymin,ymax))
-    #subset to the cropped area
-    test_pts <- rasterToPoints(test, function(x){!is.na(x)})
-    test_pts<-test_pts[test_pts[,3] ==1,]
-    test_pts <- matrix(test_pts, ncol = 3)
-    
-    if(nrow(test_pts)==0){
-      dist_out<-NULL
-    }
-    
-    if(nrow(test_pts>= 1)){
-      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
-    }
-  }
-  
-  if(is.null(dist_out)){
-    #have capped the maximum cropping distance to 4 degrees so that we don't end up cropping beyond the extent of the original raster e.g. values >180 degrees
-    xmin<-x$lon -4
-    xmax<-x$lon +4
-    ymin<-x$lat -4
-    ymax<-x$lat +4
-    test<-crop(hansen, c(xmin,xmax,ymin,ymax))
-    #subset to the cropped area
-    test_pts <- rasterToPoints(test, function(x){!is.na(x)})
-    test_pts<-test_pts[test_pts[,3] ==1,]
-    test_pts <- matrix(test_pts, ncol = 3)
-    
-    if(nrow(test_pts)==0){
-      dist_out<-NULL
-    }
-    
-    if(nrow(test_pts>= 1)){
-      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
-    }
-  }
-  
-  if(is.null(dist_out)){
-    #have capped the maximum cropping distance to 4 degrees so that we don't end up cropping beyond the extent of the original raster e.g. values >180 degrees
-    xmin<-x$lon -5
-    xmax<-x$lon +5
-    ymin<-x$lat -5
-    ymax<-x$lat +5
-    #making sure the extents of the crop don't go over the edge of the hansen data
-    xmin[xmin < -180]<- -180
-    xmax[xmax > 180]<- 180
-    ymin[xmin < -60]<- -60
-    ymax[xmin < 80]<- 80
-    test<-crop(hansen, c(xmin,xmax,ymin,ymax))
-    #subset to the cropped area
-    test_pts <- rasterToPoints(test, function(x){!is.na(x)})
-    test_pts<-test_pts[test_pts[,3] ==1,]
-    test_pts <- matrix(test_pts, ncol = 3)
+    test_pts <- buff_crop(x, 0.1)
 
     if(nrow(test_pts)==0){
       dist_out<-NULL
     }
+    
+    if(nrow(test_pts>= 1)){
+      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+    }
+  }
+  
+  if(is.null(dist_out)){
+    
+    test_pts<-buff_crop(x, 0.5)
+    
+    if(nrow(test_pts)==0){
+      dist_out<-NULL
+    }
+    
+    if(nrow(test_pts>= 1)){
+      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+    }
+  }
+  
+  if(is.null(dist_out)){
+    
+    test_pts<-buff_crop(x, 1)
+    
+    if(nrow(test_pts)==0){
+      dist_out<-NULL
+    }
+    
+    if(nrow(test_pts>= 1)){
+      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+    }
+  }
+  
+  if(is.null(dist_out)){
+    test_pts<-buff_crop(x, 4)
+    if(nrow(test_pts)==0){
+      dist_out<-NULL
+    }
+    if(nrow(test_pts>= 1)){
+      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+    }
+  }
+  
+  if(is.null(dist_out)){
+    test_pts<-buff_crop(x, 10)
 
+        if(nrow(test_pts)==0){
+          dist_out<-NULL
+        }
+        
     if(nrow(test_pts>= 1)){
       dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
     }
@@ -144,10 +112,10 @@ hansen_dist_fun<-function(x){
 
 pred_u<-as.matrix(unique(pred))
 
-fun_out<-apply(pred_u[3680:nrow(pred_u),], MARGIN = 1 ,FUN = hansen_dist_fun)
+fun_out<-apply(pred_u, MARGIN = 1 ,FUN = hansen_dist_fun)
 all_dist<-do.call("rbind", fun_out)
 
-pred<-read.csv(paste0("PREDICTS_NatPlusCrop_forestBiome_Prod_Fert_ncrop_frac_harv_site_level.csv"))
+pred<-read.csv("PREDICTS_NatPlusCrop_forestBiome_Prod_Fert_ncrop_frac_harv_site_level.csv")
 all_dist_out<-merge(pred, all_dist, by=c("lon", "lat"))
 
 write.csv(all_dist_out,"hans_min_dist_sp_90.csv", row.names=FALSE)
