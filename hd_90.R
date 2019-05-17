@@ -1,11 +1,14 @@
 library(raster)
 library(tidyverse)
+library(SearchTrees)
 
 pred<-read.csv("Fiona_help_Hansen_dataset/PREDICTS_NatPlusCrop_forestBiome_Prod_Fert_ncrop_frac_harv_site_level.csv")
 pred<-data.frame(pred$Longitude, pred$Latitude)
 names(pred)=c("lon","lat")
 
 hansen<-raster("D:/Fiona/BIOTA/Fiona_help_Hansen_dataset/Hansen_reclass_90.tiff")
+
+#memory.limit(size = 1500000)
 
 buff_crop<-function(x,buff){
   
@@ -15,11 +18,16 @@ buff_crop<-function(x,buff){
   ymax<-x$lat +buff
   xmin[xmin < -180]<- -180
   xmax[xmax > 180]<- 180
-  ymin[xmin < -60]<- -60
-  ymax[xmin < 80]<- 80
+  ymin[ymin < -60]<- -60
+  ymax[ymax > 80]<- 80
+  
+  #e<-extent(xmin,xmax,ymin,ymax)
+  
   test<-crop(hansen, c(xmin,xmax,ymin,ymax))
+#  test<-ff(getValues(test))
   #subset to the cropped area
   test_pts <- rasterToPoints(test, function(x){!is.na(x)})
+  
   test_pts<-test_pts[test_pts[,3] ==1,]
   test_pts <- matrix(test_pts, ncol = 3)
   return(test_pts)
@@ -34,20 +42,28 @@ hansen_dist_fun<-function(x){
   extract_out[is.na(extract_out) | extract_out == 255] <- 0
   dist_out<-NULL
   
+  print(x)
+  
   if(extract_out == 1){
     
     dist_out<-0
-    
+    print("Cell is forest") 
   } else {
     
     test_pts <- buff_crop(x, 0.1)
 
     if(nrow(test_pts)==0){
       dist_out<-NULL
-    }
+      print("No forest within 0.1 degrees")
+      }
     
     if(nrow(test_pts>= 1)){
-      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      #dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      tree<- createTree(coordinates(test_pts))
+      inds<-knnLookup(tree, newdat = coordinates(x), columns = 1:2, k = 1)
+      dist_out<-pointDistance(x, test_pts[inds,1:2], lonlat = TRUE)/1000
+      
+      file.remove(list.files(dirname(rasterTmpFile())))
     }
   }
   
@@ -57,50 +73,76 @@ hansen_dist_fun<-function(x){
     
     if(nrow(test_pts)==0){
       dist_out<-NULL
-    }
+      print("No forest within 0.5 degrees")
+      }
     
     if(nrow(test_pts>= 1)){
-      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      #dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      tree<- createTree(coordinates(test_pts))
+      inds<-knnLookup(tree, newdat = coordinates(x), columns = 1:2, k = 1)
+      dist_out<-pointDistance(x, test_pts[inds,1:2], lonlat = TRUE)/1000      
+      
+      file.remove(list.files(dirname(rasterTmpFile())))
     }
   }
   
   if(is.null(dist_out)){
-    
+
     test_pts<-buff_crop(x, 1)
-    
+
     if(nrow(test_pts)==0){
       dist_out<-NULL
+      print("No forest within 1 degree")
     }
-    
+
     if(nrow(test_pts>= 1)){
-      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      #dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      tree<- createTree(coordinates(test_pts))
+      inds<-knnLookup(tree, newdat = coordinates(x), columns = 1:2, k = 1)
+      dist_out<-pointDistance(x, test_pts[inds,1:2], lonlat = TRUE)/1000
+
+      file.remove(list.files(dirname(rasterTmpFile())))
     }
   }
-  
+
   if(is.null(dist_out)){
-    test_pts<-buff_crop(x, 4)
+    test_pts<-buff_crop(x, 1.5)
+
     if(nrow(test_pts)==0){
       dist_out<-NULL
+      print("No forest within 1.5 degrees")
     }
+
     if(nrow(test_pts>= 1)){
-      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      #dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      tree<- createTree(coordinates(test_pts))
+      inds<-knnLookup(tree, newdat = coordinates(x), columns = 1:2, k = 1)
+      dist_out<-pointDistance(x, test_pts[inds,1:2], lonlat = TRUE)/1000
+
+      file.remove(list.files(dirname(rasterTmpFile())))
     }
   }
-  
+
   if(is.null(dist_out)){
-    test_pts<-buff_crop(x, 10)
+    test_pts<-buff_crop(x, 2)
 
         if(nrow(test_pts)==0){
           dist_out<-NULL
+          print("No forest within 2 degrees")
         }
-        
+
     if(nrow(test_pts>= 1)){
-      dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      #dist_out<-min(pointDistance(x, test_pts[,1:2], lonlat = TRUE)/1000)
+      tree<- createTree(coordinates(test_pts))
+      inds<-knnLookup(tree, newdat = coordinates(x), columns = 1:2, k = 1)
+      dist_out<-pointDistance(x, test_pts[inds,1:2], lonlat = TRUE)/1000
+
+      file.remove(list.files(dirname(rasterTmpFile())))
     }
   }
-  
+
   if(is.null(dist_out)){
-    dist_out<-paste0("Further than 10 degrees from nearest forest!")  
+    dist_out<-paste0("Further than 0.5 degrees from nearest forest!")  
   }
   
   dist_out_df<-cbind(x, dist_out)
@@ -112,7 +154,7 @@ hansen_dist_fun<-function(x){
 
 pred_u<-as.matrix(unique(pred))
 
-fun_out<-apply(pred_u, MARGIN = 1 ,FUN = hansen_dist_fun)
+fun_out<-apply(pred[5960:5961,], MARGIN = 1 ,FUN = hansen_dist_fun)
 all_dist<-do.call("rbind", fun_out)
 
 pred<-read.csv("PREDICTS_NatPlusCrop_forestBiome_Prod_Fert_ncrop_frac_harv_site_level.csv")
