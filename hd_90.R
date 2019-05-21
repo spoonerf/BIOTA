@@ -1,6 +1,6 @@
 library(raster)
 library(tidyverse)
-#install.packages('SearchTrees', repos="http://cran.r-project.org")
+install.packages('SearchTrees', repos="http://cran.r-project.org")
 
 library(SearchTrees)
 
