@@ -1,6 +1,6 @@
 library(raster)
 library(tidyverse)
-install.packages('SearchTrees', repos="http://cran.r-project.org")
+#install.packages('SearchTrees', repos="http://cran.r-project.org")
 
 library(SearchTrees)
 
@@ -47,8 +47,8 @@ hansen_dist_fun<-function(x){
   if(extract_out == 1){
     
     dist_out<-0
-    print("Cell is forest") 
-  } else {
+    
+    } else {
     
     test_pts <- buff_crop(x, 0.1)
     
