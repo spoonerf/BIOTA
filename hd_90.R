@@ -1,3 +1,7 @@
+wd<-getwd()
+
+.libPaths(c(wd,.libPaths()))
+
 library(raster)
 library(tidyverse)
 install.packages('SearchTrees', repos="http://cran.r-project.org")
@@ -48,7 +52,7 @@ hansen_dist_fun<-function(x){
     
     dist_out<-0
     
-    } else {
+  } else {
     
     test_pts <- buff_crop(x, 0.1)
     
@@ -93,7 +97,7 @@ hansen_dist_fun<-function(x){
       tree<- createTree(coordinates(test_pts))
       inds<-knnLookup(tree, newdat = coordinates(x), columns = 1:2, k = 1)
       dist_out<-pointDistance(x, test_pts[inds,1:2], lonlat = TRUE)/1000
-  
+      
     }
   }
   
