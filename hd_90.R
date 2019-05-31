@@ -117,7 +117,7 @@ hansen_dist_fun<-function(x){
   }
   
   if(is.null(dist_out)){
-    test_pts<-buff_crop(x, 10)
+    test_pts<-buff_crop(x, 3)
     
     if(nrow(test_pts)==0){
       dist_out<-NULL
@@ -133,14 +133,14 @@ hansen_dist_fun<-function(x){
   }
   
   if(is.null(dist_out)){
-    dist_out<-paste0("Further than 10 degrees from nearest forest!")  
+    dist_out<-paste0("Further than 3 degrees from nearest forest!")  
   }
   
   dist_out_df<-cbind(x, dist_out)
   print(dist_out_df)
+  unlink(dirname(rasterTmpFile()), recursive=TRUE)   #removes temporary raster files that will build up 
   return(dist_out_df)
-  file.remove(list.files(dirname(rasterTmpFile())))
-  
+    
 }
 
 #taking only unique locations to minimise processing time
@@ -153,5 +153,5 @@ all_dist<-do.call("rbind", fun_out)
 #pred<-read.csv("PREDICTS_NatPlusCrop_forestBiome_Prod_Fert_ncrop_frac_harv_site_level.csv")
 all_dist_out<-merge(pred, all_dist, by=c("lon", "lat"))
 
-write.csv(all_dist_out, "hans_min_dist_sp_90_tree.csv")
+write.csv(all_dist_out, "hans_min_dist_sp_90_tree_a.csv")
 
