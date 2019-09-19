@@ -67,7 +67,6 @@ hansen_dist_fun <- function(x) {
   x <- data.frame(x[1], x[2])
   colnames(x) <- c("lon", "lat")
   extract_out <- raster::extract(hansen, x)
-<<<<<<< HEAD
   extract_out[is.na(extract_out) | extract_out == 255] <- 0   # This may need changing if your raster has different values. Here we are looking for 1s only
   
   dist_out <- NULL
