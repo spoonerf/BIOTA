@@ -38,6 +38,7 @@ names(pred) = c("lon", "lat")
 
 hansen <- raster("Hansen_reclass_90.tiff")   #  A raster to get distances from, should ideally be binary 1s and 0s where we are looking for distances to 1s 
 
+
 buff_crop <- function(x, buff) {
   xmin <- x$lon - buff   #Adding the buffer to the point
   xmax <- x$lon + buff
@@ -61,10 +62,12 @@ buff_crop <- function(x, buff) {
   return(test_pts)
 }
 
+
 hansen_dist_fun <- function(x) {
   x <- data.frame(x[1], x[2])
   colnames(x) <- c("lon", "lat")
   extract_out <- raster::extract(hansen, x)
+<<<<<<< HEAD
   extract_out[is.na(extract_out) | extract_out == 255] <- 0   # This may need changing if your raster has different values. Here we are looking for 1s only
   
   dist_out <- NULL
@@ -109,7 +112,6 @@ hansen_dist_fun <- function(x) {
       
   }
   
-
   dist_out_df <- cbind(x, bs_out, dist_out)
   print(dist_out_df)
   unlink(dirname(rasterTmpFile()), recursive = TRUE)  #Deletes raster temp files so they don't clog up the memory
