@@ -37,9 +37,9 @@ library(data.table)
 
 
 bs <-
-  c(0.1, 0.5, 1, 2)   # Range of buffer sizes for the function to iterate, measured in degrees. I
+  c(0.1, 0.5, 1, 2)   # Range of buffer sizes for the function to iterate, measured in degrees. 
 # If a point is further than the largest buffer then it will throw a message
-# like "Further than X degrees to the nearest forest!
+# like "Further than 2 degrees to the nearest forest!
 
 pred <-
   read.csv("PREDICTS_NatPlusCrop_forestBiome_Prod_Fert_ncrop_frac_harv_site_level.csv")  # Reading in the PREDICTS data but you just need lon/lat coords
@@ -157,6 +157,6 @@ all_dist <-
 # clusterExport(cl=cl, varlist=c("hansen", "bs", "buff_crop", "hansen_dist_fun", "raster"), envir=environment())
 #
 # fun_out <-
-#   parApply(cl, pred_u[azores_rows,], MARGIN = 1 , FUN = hansen_dist_fun)  #Applying the function through the matrix of lon/lats
+#   parApply(cl, pred_u, MARGIN = 1 , FUN = hansen_dist_fun)  #Applying the function through the matrix of lon/lats
 #
 #write.csv(dist_out, "hans_min_dist_sp_90_tree.csv", row.names = FALSE)
