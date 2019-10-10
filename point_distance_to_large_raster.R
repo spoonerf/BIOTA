@@ -33,6 +33,7 @@ library(raster)
 library(tidyverse)
 library(SearchTrees)
 library(parallel)
+library(data.table)
 
 
 bs <-
